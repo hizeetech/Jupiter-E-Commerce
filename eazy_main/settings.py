@@ -68,6 +68,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.get_vendor',
+                'accounts.context_processors.get_google_api',
             ],
         },
     },
@@ -160,3 +161,8 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_SSL = True
 
 DEFAULT_FROM_EMAIL = 'GAAS Holdings <hizeetech@gmail.com>'
+
+
+GOOGLE_API_KEY = '8avy4XK0Ak7rtNyxwPjBq0ptS_7hW-3nJJ6Do0PmKz0'
+
+
