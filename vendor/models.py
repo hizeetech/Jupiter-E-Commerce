@@ -15,10 +15,10 @@ class Vendor(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-      return self.vendor_name
+        return self.vendor_name
     
     def save(self, *args, **kwargs):
-      if self.pk is not None:
+        if self.pk is not None:
             # Update
             orig = Vendor.objects.get(pk=self.pk)
             if orig.is_approved != self.is_approved:
@@ -36,4 +36,4 @@ class Vendor(models.Model):
                     # Send notification email
                     mail_subject = "We're sorry! You are not eligible for partnership on our marketplace."
                     send_notification(mail_subject, mail_template, context)
-      return super(Vendor, self).save(*args, **kwargs)
+        return super(Vendor, self).save(*args, **kwargs)
