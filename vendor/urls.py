@@ -16,9 +16,9 @@ urlpatterns = [
     path('store-builder/category/delete/<int:pk>/', views.delete_category, name='delete_category'),
 
     # ProductItem CRUD
-    # path('store-builder/product/add/', views.add_product, name='add_product'),
-    # path('store-builder/product/edit/<int:pk>/', views.edit_product, name='edit_product'),
-    # path('store-builder/product/delete/<int:pk>/', views.delete_product, name='delete_product'),
+    path('store-builder/product/add/', views.add_product, name='add_product'),
+    path('store-builder/product/edit/<int:pk>/', views.edit_product, name='edit_product'),
+    path('store-builder/product/delete/<int:pk>/', views.delete_product, name='delete_product'),
 
     # Opening Hour CRUD
     # path('opening-hours/', views.opening_hours, name='opening_hours'),
