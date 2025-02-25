@@ -20,7 +20,8 @@
                         <div class="user-holder">
 													<h5 class="text-uppercase">Manage Your Products</h5>
 													<hr>
-                          <h6> Product Categories </h6>
+                          <h6>Product Categories</h6>
+                          {% if categories %}
                           <a href="{% url 'add_product' %}" class="btn btn-success float-right m-1"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp; Add Product</a>
                           <a href="{% url 'add_category' %}" class="btn btn-info float-right m-1"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp; Add Category</a>
 
@@ -37,7 +38,11 @@
                                   </tr>
                               {% endfor %}
                             </tbody>
-                          </table>	
+                          </table>
+                          {% else %}
+                            <h5 class="text-center">No categories found.</h5>
+                            <div class="text-center"><a href="{% url 'add_category' %}" class="btn btn-success"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp; Add Category</a></div>
+                          {% endif %}
                         </div>
                     </div>
                 </div>
