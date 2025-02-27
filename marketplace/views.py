@@ -8,6 +8,7 @@ from vendor.models import Vendor
 from store.models import Category, ProductItem
 from django.db.models import Prefetch
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 def marketplace(request):
     vendors = Vendor.objects.filter(is_approved=True, user__is_active=True)
@@ -115,3 +116,24 @@ def delete_cart(request, cart_id):
                 return JsonResponse({'status': 'Failed', 'message': 'Cart Item does not exist!'})
         else:
             return JsonResponse({'status': 'Failed', 'message': 'Invalid request!'})
+        
+        
+def search(request):
+    address = request.GET.get('address')  
+    latitude = request.GET.get('lat')  
+    longitude = request.GET.get('lng')
+    radius = request.GET.get('radius')
+    keyword = request.GET.get('keyword')
+    
+    # get vendor ids that has the product items the user is looking for
+    fetch_vendors_by_productitems = ProductItem.objects.filter(product_title__icontains=keyword, is_available=True).values_list('vendor', flat=True)
+    
+    vendors = Vendor.objects.filter(Q(id__in=fetch_vendors_by_productitems) | Q(vendor_name__icontains=keyword, is_approved=True, user__is_active=True))    
+    
+    vendor_count = vendors.count()
+    context = {
+        'vendors': vendors,
+        'vendor_count': vendor_count,
+    }
+
+    return render(request, 'marketplace/listings.html', context)

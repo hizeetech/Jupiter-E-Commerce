@@ -167,6 +167,6 @@ EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = 'GAAS Holdings <hizeetech@gmail.com>'
 
 
-GOOGLE_API_KEY = '8avy4XK0Ak7rtNyxwPjBq0ptS_7hW-3nJJ6Do0PmKz0'
+GOOGLE_API_KEY = 'AlzaSyUJr9PfEmigh_lWQv1nXeP6J3aeXR2p_lj'
 
 

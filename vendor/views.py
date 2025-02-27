@@ -73,36 +73,41 @@ def productitems_by_category(request, pk=None):
     }
     return render(request, 'vendor/productitems_by_category.html', context)
   
+from django.utils.text import slugify
+
 @login_required(login_url='login')
-@user_passes_test(check_role_vendor)  
+@user_passes_test(check_role_vendor)
 def add_category(request):
-  if request.method == 'POST':
-    form = CategoryForm(request.POST)
-    if form.is_valid():
-      category_name = form.cleaned_data['category_name']
-      category_slug = slugify(category_name)
-      
-      # Check if category already exits
-      if Category.objects.filter(slug=category_slug).exists():
-        messages.error(request, 'Category with this Category name already exists!')
-        return redirect(store_builder) # Prevents duplicate entry
-      
-      category = form.save(commit=False)
-      category.vendor = get_vendor(request)
-      category.slug = category_slug
-      category.save()
-      
-      # Update product items with new category
-      messages.success(request, 'Category saved Successfully')
-      return redirect(store_builder)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category_name = form.cleaned_data['category_name']
+            category = form.save(commit=False)
+            category.vendor = get_vendor(request)
+            
+            # Generate a unique slug before saving
+            base_slug = slugify(category_name)
+            unique_slug = base_slug
+            counter = 1
+
+            # Check for duplicate slugs
+            while Category.objects.filter(slug=unique_slug).exists():
+                unique_slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            category.slug = unique_slug  # Assign the unique slug before saving
+            category.save()
+
+            messages.success(request, 'Category added successfully!')
+            return redirect('store_builder')
+        else:
+            print(form.errors)
+
     else:
-      print(form.errors)
-  else:
-    form = CategoryForm()
-  context = {
-    'form': form,
-  }
-  return render(request, 'vendor/add_category.html', context)
+        form = CategoryForm()
+
+    context = {'form': form}
+    return render(request, 'vendor/add_category.html', context)
 
 
 @login_required(login_url='login')
