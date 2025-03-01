@@ -6,6 +6,7 @@
       </li>
       <li class="{% if 'profile' in request.path %}active{% endif %}"><a href="{% url 'vprofile' %}"><i class="icon-building"></i>My Business Profile</a></li>
       <li class="{% if 'store-builder' in request.path %}active{% endif %}"><a href="{% url 'store_builder' %}"><i class="icon-menu5"></i>Store Builder</a></li>
+      <li class="{% if 'opening-hour' in request.path %}active{% endif %}"><a href="{% url 'opening_hours' %}"><i class="icon-menu5"></i>Opening Hours</a></li>
       <li><a href=""><i class="icon-add_shopping_cart"></i>Orders</a></li>
       <li><a href=""><i class="icon-money"></i>Earnings</a></li>
       <li><a href=""><i class="icon-file-text22"></i>Statement</a></li>
