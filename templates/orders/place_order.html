@@ -95,9 +95,30 @@
                                         <span id="total">{{ grand_total }}</span>
                                       </span>
                                     </li>
-
+                                    {% if order.payment_method == 'PayPal' %}
                                     <!-- PayPal Checkout Button -->
                                     <div id="paypal-button-container"></div>
+                                    {% elif order.payment_method == 'Paystack' %}
+                                    <div id="rzp_payment_button">
+                                      <button class="btn btn-danger w-100 p-2" id="rzp-button1"><b>Pay with Paystack</b></button>
+                                      <script src="https://js.paystack.co/v1/inline.js"></script>
+                                    </div>
+                                    {% elif order.payment_method == 'Flutterwave' %}
+                                    <div id="rzp_payment_button">
+                                      <button class="btn btn-danger w-100 p-2" id="rzp-button1"><b>Pay with Flutterwave</b></button>
+                                      <script src="https://checkout.flutterwave.com/v3.js"></script>
+                                    </div>
+                                    {% elif order.payment_method == 'Opay' %}
+                                    <div id="rzp_payment_button">
+                                      <button class="btn btn-danger w-100 p-2" id="rzp-button1"><b>Pay with Opay</b></button>
+                                      <script src="https://cashierapi.opayweb.com/static/js/cashier_sdk.js"></script>
+                                    </div>
+                                    {% elif order.payment_method == 'Monnify' %}
+                                    <div id="rzp_payment_button">
+                                      <button class="btn btn-danger w-100 p-2" id="rzp-button1"><b>Pay with Monnify</b></button>
+                                      <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
+                                    </div>
+                                    {% endif %}
                                   </ul>
                                 </div>
 
