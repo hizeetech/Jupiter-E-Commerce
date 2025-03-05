@@ -34,3 +34,20 @@ def order_total_by_vendor(order, vendor_id):
     }
 
     return context
+
+import requests
+from django.conf import settings
+
+def verify_flutterwave_payment(transaction_id):
+    url = f"https://api.flutterwave.com/v3/transactions/{transaction_id}/verify"
+    headers = {
+        "Authorization": f"Bearer {settings.FLUTTERWAVE_SECRET_KEY}"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        return response.json()['data']
+    except Exception as e:
+        print(f"Flutterwave verification error: {str(e)}")
+        return None

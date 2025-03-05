@@ -14,6 +14,14 @@ from accounts.utils import send_notification
 from django.contrib.sites.shortcuts import get_current_site
 
 
+from django.conf import settings
+from .paystack_utils import verify_paystack_payment
+from django.views.decorators.csrf import csrf_exempt
+
+import logging
+logger = logging.getLogger(__name__)
+
+
 
 @login_required(login_url='login')
 def place_order(request):
@@ -84,7 +92,8 @@ def place_order(request):
       context = {
         'order': order,
         'cart_items': cart_items,
-        
+        'PAYSTACK_PUBLIC_KEY': settings.PAYSTACK_PUBLIC_KEY,
+        'FLUTTERWAVE_PUBLIC_KEY': settings.FLUTTERWAVE_PUBLIC_KEY
       }
       return render(request, 'orders/place_order.html', context)
     else:
@@ -95,94 +104,135 @@ def place_order(request):
 
 @login_required(login_url='login')
 def payments(request):
-    # Check if the request is ajax or not
-  if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
-    # STORE THE PAYMENT DETAILS IN THE PAYMENT MODEL
-    order_number = request.POST.get('order_number')
-    transaction_id = request.POST.get('transaction_id')
-    payment_method = request.POST.get('payment_method')
-    status = request.POST.get('status')
-    
-    order = Order.objects.get(user=request.user, order_number=order_number)
-    payment = Payment(
-        user = request.user,
-        transaction_id = transaction_id,
-        payment_method = payment_method,
-        amount = order.total,
-        status = status
-    )
-    payment.save()
-    
-    # UPDATE THE ORDER MODEL
-    order.payment = payment
-    order.is_ordered = True
-    order.save()
+	# Check if the request is ajax or not
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
+	# STORE THE PAYMENT DETAILS IN THE PAYMENT MODEL
+        order_number = request.POST.get('order_number')
+        transaction_id = request.POST.get('transaction_id')
+        payment_method = request.POST.get('payment_method')
+        status = request.POST.get('status')
 
-    # MOVE THE CART ITEMS TO ORDERED PRODUCT MODEL
-    cart_items = Cart.objects.filter(user=request.user)
-    for item in cart_items:
-      ordered_product = OrderedProduct()
-      ordered_product.order = order
-      ordered_product.payment = payment
-      ordered_product.user = request.user
-      ordered_product.productitem = item.productitem
-      ordered_product.quantity = item.quantity
-      ordered_product.price = item.productitem.price
-      ordered_product.amount = item.productitem.price * item.quantity # total amount
-      ordered_product.save()
-      
-    # SEND ORDER CONFIRMATION EMAIL TO THE CUSTOMER
-    mail_subject = 'Thank you for ordering with us.'
-    mail_template = 'orders/order_confirmation_email.html'
+        order = Order.objects.get(user=request.user, order_number=order_number)
+        payment = Payment(
+            user = request.user,
+            transaction_id = transaction_id,
+            payment_method = payment_method,
+            amount = order.total,
+            status = status
+        )
+        payment.save()
 
-    ordered_product = OrderedProduct.objects.filter(order=order)
-    customer_subtotal = 0
-    for item in ordered_product:
-        customer_subtotal += (item.price * item.quantity)
-    tax_data = json.loads(order.tax_data)
-    context = {
-        'user': request.user,
-        'order': order,
-        'to_email': order.email,
-        'ordered_product': ordered_product,
-        'domain': get_current_site(request),
-        'customer_subtotal': customer_subtotal,
-        'tax_data': tax_data,
-    }
-    send_notification(mail_subject, mail_template, context)
-      
-    # SEND ORDER RECEIVED EMAIL TO THE VENDOR
-    mail_subject = 'You have received a new order.'
-    mail_template = 'orders/new_order_received.html'
-    to_emails = []
-    for i in cart_items:
-      if i.productitem.vendor.user.email not in to_emails:
-        to_emails.append(i.productitem.vendor.user.email)
+        # Verify Paystack payment if applicable
+        if payment_method == 'Paystack':
+            transaction_data = verify_paystack_payment(transaction_id)
+            logger.info(f"Paystack verification response: {transaction_data}")
+            if not transaction_data or transaction_data.get('status') != 'success':
+                logger.error(f"Paystack verification failed for transaction {transaction_id}")
+                return JsonResponse({
+                    'status': 'fail',
+                    'message': 'Payment verification failed'
+                }, status=400)
+            
+            # Update status from Paystack response
+            status = transaction_data.get('gateway_response', 'Pending')
+            
+        elif payment_method == 'Flutterwave':
+            from .utils import verify_flutterwave_payment
+            verification = verify_flutterwave_payment(transaction_id)
+            
+            if not verification or verification.get('status') != 'successful':
+                return JsonResponse({
+                    'status': 'fail', 
+                    'message': 'Flutterwave payment verification failed'
+                }, status=400)
+            
+            verified_amount = float(verification.get('amount', 0))
+            status = verification.get('status', 'Pending')
+        else:
+            return JsonResponse({
+                'status': 'fail',
+                'message': 'Unsupported payment method'
+            }, status=400)
 
-        ordered_product_to_vendor = OrderedProduct.objects.filter(order=order, productitem__vendor=i.productitem.vendor)
-        print(ordered_product_to_vendor)
+        # Validate amount matches order total
+        if abs(verified_amount - float(order.total)) > 0.01:
+            return JsonResponse({
+                'status': 'fail',
+                'message': f'Amount mismatch. Expected {order.total}, got {verified_amount}'
+            }, status=400)
 
 
+		# UPDATE THE ORDER MODEL
+        order.payment = payment
+        order.is_ordered = True
+        order.save()
+
+        # MOVE THE CART ITEMS TO ORDERED PRODUCT MODEL
+        cart_items = Cart.objects.filter(user=request.user)
+        for item in cart_items:
+            ordered_product = OrderedProduct()
+            ordered_product.order = order
+            ordered_product.payment = payment
+            ordered_product.user = request.user
+            ordered_product.productitem = item.productitem
+            ordered_product.quantity = item.quantity
+            ordered_product.price = item.productitem.price
+            ordered_product.amount = item.productitem.price * item.quantity # total amount
+            ordered_product.save()
+
+		# SEND ORDER CONFIRMATION EMAIL TO THE CUSTOMER
+        mail_subject = 'Thank you for ordering with us.'
+        mail_template = 'orders/order_confirmation_email.html'
+
+        ordered_product = OrderedProduct.objects.filter(order=order)
+        customer_subtotal = 0
+        for item in ordered_product:
+            customer_subtotal += (item.price * item.quantity)
+        tax_data = json.loads(order.tax_data)
         context = {
+            'user': request.user,
             'order': order,
-            'to_email': i.productitem.vendor.user.email,
-            'ordered_product_to_vendor': ordered_product_to_vendor,
-            'vendor_subtotal': order_total_by_vendor(order, i.productitem.vendor.id)['subtotal'],
-            #'tax_data': order_total_by_vendor(order, i.productitem.vendor.id)['tax_dict'],
-            #'vendor_grand_total': order_total_by_vendor(order, i.productitem.vendor.id)['grand_total'],
+            'to_email': order.email,
+            'ordered_product': ordered_product,
+            'domain': get_current_site(request),
+            'customer_subtotal': customer_subtotal,
+            'tax_data': tax_data,
         }
         send_notification(mail_subject, mail_template, context)
-    
-    # CLEAR THE CART IF THE PAYMENT IS SUCCESS
-    cart_items.delete() 
+        
 
-    # RETURN BACK TO AJAX WITH THE STATUS SUCCESS OR FAILURE
-    response = {
-        'order_number': order_number,
-        'transaction_id': transaction_id,
-    }
-    return JsonResponse(response)      
-  return HttpResponse('Payments view')
+        # SEND ORDER RECEIVED EMAIL TO THE VENDOR
+        mail_subject = 'You have received a new order.'
+        mail_template = 'orders/new_order_received.html'
+        to_emails = []
+        for i in cart_items:
+            if i.productitem.vendor.user.email not in to_emails:
+                to_emails.append(i.productitem.vendor.user.email)
+
+                ordered_product_to_vendor = OrderedProduct.objects.filter(order=order, productitem__vendor=i.productitem.vendor)
+                print(ordered_product_to_vendor)
+
+        
+                context = {
+                    'order': order,
+                    'to_email': i.productitem.vendor.user.email,
+                    'ordered_product_to_vendor': ordered_product_to_vendor,
+                    'vendor_subtotal': order_total_by_vendor(order, i.productitem.vendor.id)['subtotal'],
+                    'tax_data': order_total_by_vendor(order, i.productitem.vendor.id)['tax_dict'],
+                    'vendor_grand_total': order_total_by_vendor(order, i.productitem.vendor.id)['grand_total'],
+                }
+                send_notification(mail_subject, mail_template, context)
+
+        # CLEAR THE CART IF THE PAYMENT IS SUCCESS
+        # cart_items.delete() 
+
+        # RETURN BACK TO AJAX WITH THE STATUS SUCCESS OR FAILURE
+        response = {
+            'order_number': order_number,
+            'transaction_id': transaction_id,
+        }
+        return JsonResponse(response)
+    return HttpResponse('Payments view')
 
 
 def order_complete(request):
@@ -206,6 +256,21 @@ def order_complete(request):
             'tax_data': tax_data,
         }
         return render(request, 'orders/order_complete.html', context)
-    except Exception as e:
-      print("Error:", str(e))
-      return redirect('home')
+    except:
+        return redirect('home')
+    
+
+@csrf_exempt
+def paystack_webhook(request):
+    if request.method == 'POST':
+        payload = json.loads(request.body)
+        if payload['event'] == 'charge.success':
+            reference = payload['data']['reference']
+            # Update your payment status here
+            try:
+                payment = Payment.objects.get(transaction_id=reference)
+                payment.status = 'Success'
+                payment.save()
+            except Payment.DoesNotExist:
+                pass
+    return HttpResponse(status=200)

@@ -106,7 +106,7 @@
                                                     <span>{{ product.description }}</span>
                                                 </div>
                                                 <div class="price-holder">
-                                                    <span class="price">${{ product.price }}</span>
+                                                    <span class="price">&#8358;{{ product.price }}</span>
 
                                                     <a href="#" class="decrease_cart" data-id="{{ product.id }}" data-url="{% url 'decrease_cart' product.id %}" style="margin-right: 28px;"><i class="icon-minus text-color"></i></a>
                                                     <label id="qty-{{product.id}}">0</label>

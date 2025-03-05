@@ -24,3 +24,18 @@ def get_google_api(request):
 
 def get_paypal_client_id(request):
     return {'PAYPAL_CLIENT_ID': settings.PAYPAL_CLIENT_ID}
+
+def get_paystack_secret_key(request):
+    return {'PAYSTACK_SECRET_KEY': settings.PAYSTACK_SECRET_KEY}
+
+
+def get_paystack_public_key(request):
+    return {'PAYSTACK_PUBLIC_KEY': settings.PAYSTACK_PUBLIC_KEY}
+
+
+def get_flutterwave_public_key(request):
+    return {'FLUTTERWAVE_PUBLIC_KEY': settings.FLUTTERWAVE_PUBLIC_KEY}
+
+
+def get_flutterwave_secret_key(request):
+    return {'FLUTTERWAVE_SECRET_KEY': settings.FLUTTERWAVE_SECRET_KEY}
