@@ -116,21 +116,19 @@ def payments(request):
         transaction_id = request.POST.get('transaction_id')
         payment_method = request.POST.get('payment_method')
         status = request.POST.get('status')
+        logger.info(f"order_number: {order_number}, transaction_id: {transaction_id}, payment_method: {payment_method}, status: {status}")
 
-        logger.info(f"Received payment request: order_number={order_number}, transaction_id={transaction_id}, payment_method={payment_method}, status={status}")
-
-        if not transaction_id:
-            logger.error("Transaction ID is missing in the request.")
+        if not all([order_number, transaction_id, payment_method, status]):
             return JsonResponse({
                 'status': 'fail',
-                'message': 'Transaction ID is required.'
+                'message': 'Missing required data.'
             }, status=400)
 
         try:
             order = Order.objects.get(user=request.user, order_number=order_number)
             payment = Payment(
                 user=request.user,
-                transaction_id=transaction_id,  # Ensure this is not null
+                transaction_id=transaction_id,
                 payment_method=payment_method,
                 amount=order.total,
                 status=status
@@ -226,6 +224,7 @@ def payments(request):
 
             # Return success response
             response = {
+                'status': 'success',
                 'order_number': order_number,
                 'transaction_id': transaction_id,
             }
@@ -236,9 +235,10 @@ def payments(request):
             return JsonResponse({
                 'status': 'fail',
                 'message': str(e)
-            }, status=500)
+            }, status=400) # send 400 error with message.
 
-    return HttpResponse('Payments view')
+    return JsonResponse({'status': 'fail', 'message': 'Invalid request'}, status=400)
+
 @csrf_exempt
 def paystack_webhook(request):
     if request.method == 'POST':

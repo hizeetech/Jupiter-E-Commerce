@@ -173,7 +173,7 @@
         }
     }).render('#paypal-button-container');
 
-    {% if order.payment_method == 'Paystack' %}
+    {% elif order.payment_method == 'Paystack' %}
     document.getElementById('paystack-button').onclick = function (e){
         e.preventDefault();
         const handler = PaystackPop.setup({
@@ -271,27 +271,40 @@
     };
     {% endif %}
 
-    function sendTransaction(transaction_id, payment_method, status) {
+    // Send the data to payments view to store in the database
+    function sendTransaction(transaction_id, payment_method, status){
         $.ajax({
             type: 'POST',
             url: url,
             data: {
                 'order_number': order_number,
                 'transaction_id': transaction_id,
-                'payment_method': payment_method, // Ensure this matches one of the choices
+                'payment_method': payment_method,
                 'status': status,
                 'csrfmiddlewaretoken': csrftoken
             },
-            success: function (response) {
-                console.log('Payment successful:', response);
-                window.location.href = `${order_complete}?order_no=${response.order_number}&trans_id=${response.transaction_id}`;
+            success: function(response){
+                console.log('Payment Success Response:', response); // Log the full response
+                if (response.status === 'success') {
+                    window.location.href = order_complete +'?order_no='+response.order_number+'&trans_id='+response.transaction_id;
+                } else {
+                    console.error("Payment was not successful according to server response");
+                }
             },
-            error: function (xhr) {
-                console.error('Payment failed:', xhr.responseText);
-                document.getElementById('paystack-payment-section').innerHTML = '<div class="alert alert-danger">Payment failed. Please try again.</div>';
+            error: function(error) {
+                // Check if the server returned a JSON response
+                if (error.responseJSON) {
+                    // Log the server's error message
+                    console.error("Server-side error:", error.responseJSON.message);
+                    // Handle the server's error message
+                    alert(error.responseJSON.message);
+                } else {
+                    // Handle non-JSON errors or other request errors
+                    console.error("Error during AJAX request:", error);
+                    alert("An unexpected error occurred. Please try again later.");
+                }
             }
-        });
+        })
     }
-    
 </script>
 {% endblock %}
