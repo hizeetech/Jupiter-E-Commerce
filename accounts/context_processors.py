@@ -39,3 +39,13 @@ def get_flutterwave_public_key(request):
 
 def get_flutterwave_secret_key(request):
     return {'FLUTTERWAVE_SECRET_KEY': settings.FLUTTERWAVE_SECRET_KEY}
+
+
+def get_monnify_secret_key(request):
+    return {'MONNIFY_SECRET_KEY': settings.MONNIFY_SECRET_KEY}
+
+def get_monnify_api_key(request):
+    return {'MONNIFY_API_KEY': settings.MONNIFY_API_KEY}
+
+def get_monnify_contract_code(request):
+    return {'MONNIFY_CONTRACT_CODE': settings.MONNIFY_CONTRACT_CODE}

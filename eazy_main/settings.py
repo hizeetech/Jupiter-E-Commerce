@@ -84,6 +84,9 @@ TEMPLATES = [
                 'accounts.context_processors.get_paystack_public_key',
                 'accounts.context_processors.get_flutterwave_public_key',
                 'accounts.context_processors.get_flutterwave_secret_key',
+                'accounts.context_processors.get_monnify_secret_key',
+                'accounts.context_processors.get_monnify_api_key',
+                'accounts.context_processors.get_monnify_contract_code',
             ],
         },
     },
@@ -190,5 +193,12 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 PAYSTACK_SECRET_KEY = 'sk_test_a27e0fb00844f9ebc243354bf8ae1e03d8e56619'
 PAYSTACK_PUBLIC_KEY = 'pk_test_bf0820e2d1070f515fe2ef79b29a38122a8166ed'
 
+#PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
+#PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
+
 FLUTTERWAVE_PUBLIC_KEY = 'FLWPUBK_TEST-a0d125856a65e984394762f12b5a9ef9-X'
 FLUTTERWAVE_SECRET_KEY = 'FLWSECK_TEST-c720c791f59bc8615d6863daf8ada888-X'
+
+MONNIFY_API_KEY = config('MONNIFY_API_KEY')
+MONNIFY_SECRET_KEY = config('MONNIFY_SECRET_KEY')
+MONNIFY_CONTRACT_CODE = config('MONNIFY_CONTRACT_CODE')

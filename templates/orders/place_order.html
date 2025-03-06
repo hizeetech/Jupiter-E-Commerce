@@ -107,7 +107,9 @@
                                             </div>
                                             {% elif order.payment_method == 'Monnify' %}
                                             <div id="monnify-payment-section">
-                                                <button class="btn btn-danger w-100 p-2" id="monnify-button"><b>Pay with Monnify</b></button>
+                                                <button class="btn btn-danger w-100 p-2" id="monnify-button">
+                                                    <b>Pay with Monnify</b>
+                                                </button>
                                                 <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
                                             </div>
                                             {% endif %}
@@ -143,39 +145,7 @@
     const order_number = "{{ order.order_number }}";
     const csrftoken = getCookie('csrftoken');
     const order_complete = "{% url 'order_complete' %}";
-
-    function sendTransaction(transaction_id, payment_method, status) {
-        let containerId;
-        switch (payment_method) {
-            case 'Paystack': containerId = 'paystack-payment-section'; break;
-            case 'Flutterwave': containerId = 'flutterwave-payment-section'; break;
-            case 'Opay': containerId = 'opay-payment-section'; break;
-            case 'Monnify': containerId = 'monnify-payment-section'; break;
-            default: containerId = 'paypal-button-container';
-        }
-
-        const loadingHTML = '<div class="text-center"><i class="fa fa-spinner fa-spin"></i> Processing...</div>';
-        document.getElementById(containerId).innerHTML = loadingHTML;
-
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: {
-                'order_number': order_number,
-                'transaction_id': transaction_id,
-                'payment_method': payment_method,
-                'status': status,
-                'csrfmiddlewaretoken': csrftoken
-            },
-            success: function (response) {
-                window.location.href = `<span class="math-inline">\{order\_complete\}?order\_no\=</span>{response.order_number}&trans_id=${response.transaction_id}`;
-            },
-            error: function (xhr) {
-                document.getElementById(containerId).innerHTML = '<div class="alert alert-danger">Payment failed. Please try again.</div>';
-                console.error('Error:', xhr.responseText);
-            }
-        });
-    }
+    console.log('csrftoken===>', csrftoken)
 
     {% if order.payment_method == 'PayPal' %}
     paypal.Buttons({
@@ -202,8 +172,9 @@
             });
         }
     }).render('#paypal-button-container');
-    {% elif order.payment_method == 'Paystack' %}
-    document.getElementById('paystack-button').onclick = function (e) {
+
+    {% if order.payment_method == 'Paystack' %}
+    document.getElementById('paystack-button').onclick = function (e){
         e.preventDefault();
         const handler = PaystackPop.setup({
             key: "{{ PAYSTACK_PUBLIC_KEY }}",
@@ -219,17 +190,22 @@
                     value: "{{ order.name }}"
                 }]
             },
-            callback: function (response) {
-                if (response.status === 'success') {
-                    sendTransaction(response.reference, 'Paystack', 'Success');
+            callback: function (response){
+                if (response.status === 'success'){
+                    // Ensure the transaction_id is correctly extracted
+                    const transaction_id = response.reference; // Paystack returns the reference as the transaction ID
+                    console.log('Paystack transaction_id:', transaction_id);
+                    sendTransaction(transaction_id, 'Paystack', 'Success');
                 }
             },
-            onClose: function () {
+            onClose: function (){
                 alert('Payment window closed.');
             }
         });
         handler.openIframe();
     };
+
+
     {% elif order.payment_method == 'Flutterwave' %}
     document.getElementById('flutterwave-button').onclick = function (e) {
         e.preventDefault();
@@ -259,12 +235,14 @@
             }
         });
     };
+
     {% elif order.payment_method == 'Opay' %}
     document.getElementById('opay-button').onclick = function (e) {
         e.preventDefault();
         // Implement Opay logic here, using the cashier_sdk.js
         alert('Opay integration not yet implemented.');
     };
+
     {% elif order.payment_method == 'Monnify' %}
     document.getElementById('monnify-button').onclick = function (e) {
         e.preventDefault();
@@ -292,5 +270,31 @@
         });
     };
     {% endif %}
+
+    function sendTransaction(transaction_id, payment_method, status) {
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'order_number': order_number,
+                'transaction_id': transaction_id,
+                'payment_method': payment_method,
+                'status': status,
+                'csrfmiddlewaretoken': csrftoken
+            },
+            success: function (response) {
+                console.log('Payment successful:', response);
+                // Construct the order_complete URL with the correct query parameters
+                const orderCompleteUrl = `${order_complete}?order_no=${response.order_number}&trans_id=${response.transaction_id}`;
+                console.log('Redirecting to:', orderCompleteUrl);
+                window.location.href = orderCompleteUrl; // Redirect to the order complete page
+            },
+            error: function (xhr) {
+                console.error('Payment failed:', xhr.responseText);
+                document.getElementById('paystack-payment-section').innerHTML = '<div class="alert alert-danger">Payment failed. Please try again.</div>';
+            }
+        });
+    }
+    
 </script>
 {% endblock %}
