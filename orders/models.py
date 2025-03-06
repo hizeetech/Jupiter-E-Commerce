@@ -10,23 +10,23 @@ request_object = ''
 
 class Payment(models.Model):
     PAYMENT_METHOD = (
-        ('paystack', 'Paystack'),
-        ('flutterwave', 'Flutterwave'),
-        ('opay', 'Opay'),
-        ('monnify', 'Monnify (Moniepoint)'),
-        ('PayPal', 'PayPal'),        
+        ('PayPal', 'PayPal'),
+        ('Paystack', 'Paystack'),
+        ('Flutterwave', 'Flutterwave'),
+        ('Opay', 'Opay'),
+        ('Monnify', 'Monnify'),        
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    transaction_id = models.CharField(max_length=100)
+    transaction_id = models.CharField(max_length=100, unique=True, null=False, blank=False)
     payment_method = models.CharField(choices=PAYMENT_METHOD, max_length=100)
-    amount = models.CharField(max_length=10)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=100)
     public_key = models.CharField(max_length=255, blank=True, null=True)
     secret_key = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.transaction_id
+        return f"{self.user.username} - {self.payment_method} {self.transaction_id} - {self.amount}"
 
 
 class Order(models.Model):

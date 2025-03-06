@@ -278,16 +278,13 @@
             data: {
                 'order_number': order_number,
                 'transaction_id': transaction_id,
-                'payment_method': payment_method,
+                'payment_method': payment_method, // Ensure this matches one of the choices
                 'status': status,
                 'csrfmiddlewaretoken': csrftoken
             },
             success: function (response) {
                 console.log('Payment successful:', response);
-                // Construct the order_complete URL with the correct query parameters
-                const orderCompleteUrl = `${order_complete}?order_no=${response.order_number}&trans_id=${response.transaction_id}`;
-                console.log('Redirecting to:', orderCompleteUrl);
-                window.location.href = orderCompleteUrl; // Redirect to the order complete page
+                window.location.href = `${order_complete}?order_no=${response.order_number}&trans_id=${response.transaction_id}`;
             },
             error: function (xhr) {
                 console.error('Payment failed:', xhr.responseText);
