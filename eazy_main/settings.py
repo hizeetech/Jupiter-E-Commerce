@@ -87,6 +87,7 @@ TEMPLATES = [
                 'accounts.context_processors.get_monnify_secret_key',
                 'accounts.context_processors.get_monnify_api_key',
                 'accounts.context_processors.get_monnify_contract_code',
+                
             ],
         },
     },
@@ -202,3 +203,5 @@ FLUTTERWAVE_SECRET_KEY = config('FLUTTERWAVE_SECRET_KEY')
 MONNIFY_API_KEY = config('MONNIFY_API_KEY')
 MONNIFY_SECRET_KEY = config('MONNIFY_SECRET_KEY')
 MONNIFY_CONTRACT_CODE = config('MONNIFY_CONTRACT_CODE')
+
+

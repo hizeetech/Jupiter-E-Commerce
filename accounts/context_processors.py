@@ -49,3 +49,5 @@ def get_monnify_api_key(request):
 
 def get_monnify_contract_code(request):
     return {'MONNIFY_CONTRACT_CODE': settings.MONNIFY_CONTRACT_CODE}
+
+
