@@ -39,7 +39,7 @@ class Order(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
-    vendors = models.ManyToManyField(Vendor, blank=True)
+    vendors = models.ManyToManyField(Vendor, blank=True)    
     order_number = models.CharField(max_length=20)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -69,6 +69,7 @@ class Order(models.Model):
         return ", ".join([str(i) for i in self.vendors.all()])
 
     def get_total_by_vendor(self):
+        # sourcery skip: dict-assign-update-to-union, inline-immediately-returned-variable
         vendor = Vendor.objects.get(user=request_object.user)
         subtotal = 0
         tax = 0

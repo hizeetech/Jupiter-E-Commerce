@@ -23,7 +23,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 @login_required(login_url='login')
-def place_order(request):
+def place_order(request):  # sourcery skip: dict-assign-update-to-union, hoist-similar-statement-from-if, hoist-statement-from-if, inline-variable, move-assign-in-block, simplify-dictionary-update
     cart_items = Cart.objects.filter(user=request.user).order_by('created_at')
     cart_count = cart_items.count()
     if cart_count <= 0:
