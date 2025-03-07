@@ -1,12 +1,16 @@
 # eazy_main/views.py
-from django.shortcuts import render
+from django.conf import settings
+from django.shortcuts import redirect, render
 from django.http import HttpResponse
+import requests
 
+from orders.models import Order
 from vendor.models import Vendor
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D # ``D`` is a shortcut for ``Distance``
 from django.contrib.gis.db.models.functions import Distance
+
 
 
 def get_or_set_current_location(request):
@@ -39,3 +43,4 @@ def home(request):
         'vendors': vendors,
     }
     return render(request, 'home.html', context)
+

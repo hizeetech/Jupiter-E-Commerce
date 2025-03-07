@@ -126,25 +126,26 @@
 </div>
 <script>
     function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
                 }
             }
         }
         return cookieValue;
     }
 
-    const grand_total_float = parseFloat("{{ grand_total|stringformat:'f' }}");
-    const url = "{% url 'payments' %}";
-    const order_number = "{{ order.order_number }}";
+    var grand_total_float = parseFloat("{{ grand_total|stringformat:'f' }}");
+    var url = "{% url 'payments' %}";
+    var order_number = "{{ order.order_number }}";
     const csrftoken = getCookie('csrftoken');
-    const order_complete = "{% url 'order_complete' %}";
+    var order_complete = "{% url 'order_complete' %}";
     console.log('csrftoken===>', csrftoken)
 
     {% if order.payment_method == 'PayPal' %}
@@ -193,9 +194,14 @@
             callback: function (response){
                 if (response.status === 'success'){
                     // Ensure the transaction_id is correctly extracted
+                    const element = document.getElementById('paystack-payment-section');
+                    element.innerHTML = '';
+                    element.innerHTML = '<h4 class="text-center"><i class="fa fa-spinner fa-spin"></i> Please wait...</h4>';
+                    var payment_method = 'Paystack'
+                    var status = 'Success'
                     const transaction_id = response.reference; // Paystack returns the reference as the transaction ID
                     console.log('Paystack transaction_id:', transaction_id);
-                    sendTransaction(transaction_id, 'Paystack', 'Success');
+                    sendTransaction(transaction_id, 'payment_method', 'status');
                 }
             },
             onClose: function (){
