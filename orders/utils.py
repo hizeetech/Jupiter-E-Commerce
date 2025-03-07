@@ -3,12 +3,14 @@ import datetime
 import simplejson as json
 
 def generate_order_number(pk):
+  # sourcery skip: inline-immediately-returned-variable
   current_datetime = datetime.datetime.now().strftime('%Y%m%d%H%M%S') #20220616233810 + pk
   order_number = current_datetime + str(pk)
   return order_number
 
 
 def order_total_by_vendor(order, vendor_id):
+  # sourcery skip: dict-assign-update-to-union, inline-immediately-returned-variable, inline-immediately-returned-variable
     total_data = json.loads(order.total_data)
     data = total_data.get(str(vendor_id))
     subtotal = 0

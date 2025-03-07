@@ -112,7 +112,7 @@ logger = logging.getLogger(__name__)
 
 
 @login_required(login_url='login')
-def payments(request):
+def payments(request):  # sourcery skip: sum-comprehension
     if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
         try:
             # Extract payment parameters with safety checks
@@ -186,32 +186,47 @@ def payments(request):
                 'ordered_product': ordered_products,
             }
 
-            # Send customer confirmation
-            send_notification(
-                'Thank you for ordering with us.',
-                'orders/order_confirmation_email.html',
-                {**email_context, 'to_email': order.email}
-            )
+            # SEND ORDER CONFIRMATION EMAIL TO THE CUSTOMER
+            mail_subject = 'Thank you for ordering with us.'
+            mail_template = 'orders/order_confirmation_email.html'
 
-            # Send vendor notifications
-            vendors_emailed = set()
-            for item in cart_items:
-                vendor = item.productitem.vendor.user
-                if vendor.email not in vendors_emailed:
-                    vendor_products = [op for op in ordered_products 
-                                      if op.productitem.vendor == item.productitem.vendor]
-                    
-                    send_notification(
-                        'You have received a new order.',
-                        'orders/new_order_received.html',
-                        {
-                            **email_context,
-                            'to_email': vendor.email,
-                            'ordered_product_to_vendor': vendor_products,
-                            'vendor_subtotal': sum(op.amount for op in vendor_products),
-                        }
-                    )
-                    vendors_emailed.add(vendor.email)
+            ordered_product = OrderedProduct.objects.filter(order=order)
+            customer_subtotal = 0
+            for item in ordered_product:
+                customer_subtotal += (item.price * item.quantity)
+            tax_data = json.loads(order.tax_data)
+            context = {
+                'user': request.user,
+                'order': order,
+                'to_email': order.email,
+                'ordered_product': ordered_product,
+                'domain': get_current_site(request),
+                'customer_subtotal': customer_subtotal,
+                'tax_data': tax_data,
+            }
+            send_notification(mail_subject, mail_template, context)
+
+            # SEND ORDER RECEIVED EMAIL TO THE VENDOR
+            mail_subject = 'You have received a new order.'
+            mail_template = 'orders/new_order_received.html'
+            to_emails = []
+            for i in cart_items:
+                if i.productitem.vendor.user.email not in to_emails:
+                    to_emails.append(i.productitem.vendor.user.email)
+
+                    ordered_product_to_vendor = OrderedProduct.objects.filter(order=order, productitem__vendor=i.productitem.vendor)
+                    print(ordered_product_to_vendor)
+
+            
+                    context = {
+                        'order': order,
+                        'to_email': i.productitem.vendor.user.email,
+                        'ordered_product_to_vendor': ordered_product_to_vendor,
+                        'vendor_subtotal': order_total_by_vendor(order, i.productitem.vendor.id)['subtotal'],
+                        'tax_data': order_total_by_vendor(order, i.productitem.vendor.id)['tax_dict'],
+                        'vendor_grand_total': order_total_by_vendor(order, i.productitem.vendor.id)['grand_total'],
+                    }
+                    send_notification(mail_subject, mail_template, context)
 
             # Clear cart after successful processing
             cart_items.delete()
