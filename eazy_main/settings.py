@@ -29,7 +29,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['172.234.201.226', '127.0.0.1', 'mart9ja.com', 'www.mart9ja.com']
 
 
 # Application definition
@@ -188,21 +188,21 @@ os.environ['PATH'] = os.path.join(BASE_DIR, 'env\Lib\site-packages\osgeo') + ';'
 os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, 'env\Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
 GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, 'env\Lib\site-packages\osgeo\gdal.dll')
 
-PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID')
+#PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID')
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 
-PAYSTACK_SECRET_KEY = 'sk_test_a27e0fb00844f9ebc243354bf8ae1e03d8e56619'
-PAYSTACK_PUBLIC_KEY = 'pk_test_bf0820e2d1070f515fe2ef79b29a38122a8166ed'
+#PAYSTACK_SECRET_KEY = 'sk_test_a27e0fb00844f9ebc243354bf8ae1e03d8e56619'
+#PAYSTACK_PUBLIC_KEY = 'pk_test_bf0820e2d1070f515fe2ef79b29a38122a8166ed'
 
-#PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
-#PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY')
 
-FLUTTERWAVE_PUBLIC_KEY = config('FLUTTERWAVE_PUBLIC_KEY')
-FLUTTERWAVE_SECRET_KEY = config('FLUTTERWAVE_SECRET_KEY')
+#FLUTTERWAVE_PUBLIC_KEY = config('FLUTTERWAVE_PUBLIC_KEY')
+#FLUTTERWAVE_SECRET_KEY = config('FLUTTERWAVE_SECRET_KEY')
 
-MONNIFY_API_KEY = config('MONNIFY_API_KEY')
-MONNIFY_SECRET_KEY = config('MONNIFY_SECRET_KEY')
-MONNIFY_CONTRACT_CODE = config('MONNIFY_CONTRACT_CODE')
+#MONNIFY_API_KEY = config('MONNIFY_API_KEY')
+#MONNIFY_SECRET_KEY = config('MONNIFY_SECRET_KEY')
+#MONNIFY_CONTRACT_CODE = config('MONNIFY_CONTRACT_CODE')
 
 
