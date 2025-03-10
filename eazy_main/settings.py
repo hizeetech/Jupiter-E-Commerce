@@ -180,7 +180,7 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 
-DEFAULT_FROM_EMAIL = 'Mart9ja Support <hizeetech@gmail.com>'
+DEFAULT_FROM_EMAIL = 'Mart9ja Admin <hizeetech@gmail.com>'
 
 GOOGLE_API_KEY = config('GOOGLE_API_KEY')
 
