@@ -185,9 +185,10 @@ DEFAULT_FROM_EMAIL = 'Mart9ja Support <support@mart9ja.com>'
 GOOGLE_API_KEY = config('GOOGLE_API_KEY')
 
 if DEBUG == True:
-    os.environ['PATH'] = os.path.join(BASE_DIR, 'env\Lib\site-packages\osgeo') + ';' + os.environ['PATH']
-    os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, 'env\Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
-    GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, 'env\Lib\site-packages\osgeo\gdal.dll')
+    os.environ['PATH'] = os.path.join(BASE_DIR, r'env\Lib\site-packages\osgeo') + ';' + os.environ['PATH']
+    os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, r'env\Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
+    GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, r'env\Lib\site-packages\osgeo\gdal.dll')
+
 
 PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID')
 
