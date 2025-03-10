@@ -22,6 +22,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 from marketplace import views as MarketplaceViews
 
+# Admin settings
+admin.site.site_header = "Mart9ja Administration"  # Replace with your desired title
+admin.site.site_title = "Mart9ja Admin Portal"
+admin.site.index_title = "Welcome to Mart9ja Admin"
+
 
 
 urlpatterns = [
