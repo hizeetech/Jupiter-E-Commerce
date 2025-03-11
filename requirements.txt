@@ -5,16 +5,15 @@ charset-normalizer==3.4.1
 distlib==0.3.9
 Django==5.1.6
 filelock==3.17.0
-backports.zoneinfo==0.2.1;python_version<"3.9"
 idna==3.10
 pillow==11.1.0
 platformdirs==4.3.6
 psycopg2-binary
 python-decouple==3.8
+pytz==2025.1
 requests==2.32.3
 simplejson==3.20.1
 sqlparse==0.5.3
 tzdata==2025.1
 urllib3==2.3.0
 virtualenv==20.29.3
-gunicorn
