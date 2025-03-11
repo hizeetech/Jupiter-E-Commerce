@@ -31,6 +31,30 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ['172.234.201.226', '127.0.0.1', 'mart9ja.com', 'www.mart9ja.com']
 
+# Redirect all HTTP traffic to HTTPS
+SECURE_SSL_REDIRECT = True  
+
+# Enable HTTP Strict Transport Security (HSTS)
+SECURE_HSTS_SECONDS = 31536000  # Enforce HSTS for 1 year (recommended)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply HSTS to all subdomains
+SECURE_HSTS_PRELOAD = True  # Allow the site to be preloaded into browsers' HSTS list
+
+# Protection against cross-site scripting (XSS) attacks
+SECURE_BROWSER_XSS_FILTER = True  
+
+# Prevent browsers from MIME-sniffing responses (reduces risk of XSS)
+SECURE_CONTENT_TYPE_NOSNIFF = True  
+
+# Secure cookies to ensure they are only sent over HTTPS
+SESSION_COOKIE_SECURE = True  # Prevent session hijacking by restricting cookies to HTTPS
+CSRF_COOKIE_SECURE = True  # Prevent CSRF attacks by securing CSRF cookie over HTTPS
+
+# Trusted domains for CSRF protection (needed for HTTPS sites)
+CSRF_TRUSTED_ORIGINS = ['https://mart9ja.com', 'https://www.mart9ja.com']
+
+
+
+
 
 # Application definition
 
