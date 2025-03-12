@@ -46,3 +46,10 @@ def send_notification(mail_subject, mail_template, context):
     send_mail = EmailMessage(mail_subject, message, from_email, to=to_email)
     send_mail.content_subtype = "html"
     send_mail.send()
+    
+    
+logo_url = f"https://{settings.ALLOWED_HOSTS[2]}/static/logo/mart9ja.png"  # mart9ja.com
+context = {
+    'logo_url': logo_url,
+    # Other context variables
+}

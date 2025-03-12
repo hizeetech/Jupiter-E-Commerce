@@ -18,6 +18,7 @@ from django.template.defaultfilters import slugify
 import datetime
 
 
+
 def check_role_vendor(user):
   if user.role == 1:
     return True
